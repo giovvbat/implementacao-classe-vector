@@ -1,16 +1,53 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
+#include <cassert>
+#include <math.h>
 using namespace std;
 
 namespace sc {    
     template<typename T>
     class vector;
     template<typename T>
+    class MyFowardIterator;
+    template<typename T>
     string to_string(const vector<T>& v);
     template<typename T>
     ostream& operator<<(ostream& os, const vector<T>& v);
 }
+
+template<typename T>
+class sc::MyFowardIterator {
+    public:
+    /*aliases*/
+    typedef MyFowardIterator iterator;
+    typedef ptrdiff_t difference_type;
+    typedef T value_type;
+    typedef T* pointer;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef bidirectional_iterator_tag iterator_category;
+
+    private:
+    pointer v_ptr;
+
+    public:
+    MyFowardIterator(pointer ptr=nullptr) { v_ptr=ptr; }
+    reference operator*() { assert(v_ptr!=nullptr); return *m_ptr; }
+    iterator operator++() { ++v_ptr; return *this; }
+    iterator operator++(int value) { iterator dummy=v_ptr+value; return dummy; }
+    iterator& operator=(const iterator& other) { v_ptr=other.ptr; return *this; }
+    pointer operator->() const { assert(m_ptr!=nullptr); return m_ptr; }
+    iterator operator--() { --v_ptr; return *this; }
+    iterator operator--(int value) { iterator dummy=v_ptr-value; return dummy; }
+    iterator& operator+=(difference_type offset) { iterator& it; it.v_ptr=v_ptr+offset; return it; }
+    iterator& operator+-(difference_type offset) { iterator& it; it.v_ptr=v_ptr-offset; return it; }
+    bool operator==(const iterator& rhs) const { if(v_ptr!=rhs.v_ptr) return false; return true; }
+    bool operator!=(const iterator& rhs) const { if(v_ptr==rhs.v_ptr) return true; return false; }
+    difference_type operator-(const iterator& rhs) const { if(v_ptr!=rhs.v_ptr) return abs(v_ptr-rhs.v_ptr); return 0; }
+
+
+};
 
 template<typename T>
 class sc::vector {
@@ -45,8 +82,8 @@ class sc::vector {
     bool empty() const { return v_end==0; }
     const_reference back() const { return v_data[v_end-1]; }
     const_reference front() const { return v_data[0]; }
-    reference back() { return v_data[v_end-1]; }
-    reference front() { return v_data[0]; }
+    reference back() { if(v_data) return v_data[v_end-1]; }
+    reference front() { if(v_data) return v_data[0]; }
     const_reference operator[](size_type pos) const { return v_data[pos]; }
     reference operator[](size_type pos) { return v_data[pos]; }
     const_reference at(size_type pos) const;
@@ -162,7 +199,7 @@ T& sc::vector<T>::at(size_type pos) {
 template<typename T>
 void sc::vector<T>::push_front(const T& value) {
     if(full()) {
-        size_type new_capacity=v_capacity+1;
+        size_type new_capacity=(v_capacity==0)?1:(v_capacity*2);
         T *new_data=new T[new_capacity];
         for(auto i{0};i<v_end;++i)
             new_data[i]=v_data[i];
@@ -179,7 +216,7 @@ void sc::vector<T>::push_front(const T& value) {
 template<typename T>
 void sc::vector<T>::push_back(const T& value) {
     if(full()) {
-        size_type new_capacity=v_capacity+1;
+        size_type new_capacity=(v_capacity==0)?1:(v_capacity*2);        
         T *new_data=new T[new_capacity];
         for(auto i{0};i<v_end;++i)
             new_data[i]=v_data[i];
@@ -214,6 +251,11 @@ void sc::vector<T>::assign(size_type count, const T& value) {
     v_end=count;
 }
 
+/*template<typename T>
+void sc::vector<T>::assign(const std::initializer_list<T>& ilist) {
+
+}*/
+
 template <typename T>
 template<typename InputItr>
 void sc::vector<T>::assign(InputItr first, InputItr last) {
@@ -229,10 +271,8 @@ void sc::vector<T>::assign(InputItr first, InputItr last) {
 /*revisar*/
 template<typename T>
 void sc::vector<T>::reserve(size_type new_cap) {
-    if(new_cap<v_capacity) {
-        cout<<"Não é possível reduzir a capacidade do vector!"<<endl;
+    if(new_cap<=v_capacity)
         return;
-    }
     T *new_data=new T[new_cap];
     for(auto i{0};i<v_end;++i)
         new_data[i]=v_data[i];
@@ -244,6 +284,8 @@ void sc::vector<T>::reserve(size_type new_cap) {
 /*revisar*/
 template<typename T>
 void sc::vector<T>::shrink_to_fit() {
+    if(v_capacity==v_end)
+        return;
     T *new_data=new T[v_end];
     for(auto i{0};i<v_end;++i)
         new_data[i]=v_data[i];
