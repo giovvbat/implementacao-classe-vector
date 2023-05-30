@@ -32,21 +32,33 @@ class sc::MyFowardIterator {
     pointer v_ptr;
 
     public:
-    MyFowardIterator(pointer ptr=nullptr) { v_ptr=ptr; }
-    reference operator*() { assert(v_ptr!=nullptr); return *m_ptr; }
+    /*construtores*/
+    MyForwardIterator(pointer pt=nullptr) { v_ptr=pt; }
+    MyForwardIterator(const iterator& other) { v_ptr=other.v_ptr; }
+    iterator& operator=(const iterator &other) { v_ptr=other.v_ptr; return *this; }
+
+    /*métodos*/
+    reference operator*() const { return *v_ptr; }
+    pointer operator->() const { return v_ptr; }
     iterator operator++() { ++v_ptr; return *this; }
-    iterator operator++(int value) { iterator dummy=v_ptr+value; return dummy; }
-    iterator& operator=(const iterator& other) { v_ptr=other.ptr; return *this; }
-    pointer operator->() const { assert(m_ptr!=nullptr); return m_ptr; }
+    iterator operator++(int) { iterator dummy{*this}; ++v_ptr; return dummy; }
     iterator operator--() { --v_ptr; return *this; }
-    iterator operator--(int value) { iterator dummy=v_ptr-value; return dummy; }
-    iterator& operator+=(difference_type offset) { iterator& it; it.v_ptr=v_ptr+offset; return it; }
-    iterator& operator+-(difference_type offset) { iterator& it; it.v_ptr=v_ptr-offset; return it; }
-    bool operator==(const iterator& rhs) const { if(v_ptr!=rhs.v_ptr) return false; return true; }
-    bool operator!=(const iterator& rhs) const { if(v_ptr==rhs.v_ptr) return true; return false; }
-    difference_type operator-(const iterator& rhs) const { if(v_ptr!=rhs.v_ptr) return abs(v_ptr-rhs.v_ptr); return 0; }
+    iterator operator--(int) { iterator dummy{*this}; --v_ptr; return dummy; }
+    iterator& operator+=(difference_type offset) { iterator& it{*this}; it.v_ptr=it.v_ptr+offset; return it; }
+    iterator& operator-=(difference_type offset) { iterator& it{*this}; it.v_ptr=it.v_ptr-offset; return it; }
+    bool operator==(const iterator& rhs_) const { return rhs_.v_ptr==v_ptr }
+    bool operator!=(const iterator& rhs_) const { return rhs_.v_ptr!=v_ptr; }
+    difference_type operator-(const iterator& rhs_) const { return v_ptr-rhs_.v_ptr; }
 
-
+    /*friends*/
+    friend bool operator<(const iterator& ita, const iterator& itb) { return ita.v_ptr<itb.v_ptr; }
+    friend bool operator>(const iterator& ita, const iterator& itb) { return ita.v_ptr>itb.v_ptr; }
+    friend bool operator<=(const iterator& ita, const iterator& itb) { return ita.v_ptr<=itb.v_ptr; }
+    friend bool operator>=(const iterator& ita, const iterator& itb) { return ita.v_ptr>=itb.v_ptr; }
+    friend iterator operator+(difference_type offset, iterator it) { iterator& dummy; dummy.v_ptr=it.v_ptr+offset; return dummy; }
+    friend iterator operator+(iterator it, difference_type offset) { iterator& dummy; dummy.v_ptr=it.v_ptr+offset; return dummy; }
+    friend iterator operator-(difference_type offset, iterator it) { iterator& dummy; dummy.v_ptr=it.v_ptr-offset; return dummy; }
+    friend std::ostream& operator<<(std::ostream& os_, const MyForwardIterator& p_) { os_<<"[@ "<<p_.v_ptr<<": "<<*p_.v_ptr<<" ]"; return os_; }
 };
 
 template<typename T>
