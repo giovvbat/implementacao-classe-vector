@@ -263,11 +263,6 @@ void sc::vector<T>::assign(size_type count, const T& value) {
     v_end=count;
 }
 
-/*template<typename T>
-void sc::vector<T>::assign(const std::initializer_list<T>& ilist) {
-
-}*/
-
 template <typename T>
 template<typename InputItr>
 void sc::vector<T>::assign(InputItr first, InputItr last) {
@@ -280,7 +275,6 @@ void sc::vector<T>::assign(InputItr first, InputItr last) {
     }
 }
 
-/*revisar*/
 template<typename T>
 void sc::vector<T>::reserve(size_type new_cap) {
     if(new_cap<=v_capacity)
@@ -293,7 +287,6 @@ void sc::vector<T>::reserve(size_type new_cap) {
     v_capacity=new_cap;
 }
 
-/*revisar*/
 template<typename T>
 void sc::vector<T>::shrink_to_fit() {
     if(v_capacity==v_end)
